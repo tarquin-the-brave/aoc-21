@@ -5,6 +5,9 @@
 (defparameter *depths*
   (mapcar #'parse-integer (uiop:read-file-lines "inputs/day1-1.txt")))
 
+; todo: Is there a recursive version of this function that is cleaner?
+; recursive was my first thought but seeing how nice the "for on" syntax
+; is this seems almost a minimal expression.
 (defun count-increases (numbers)
   (loop for (a b) on numbers
         while b
