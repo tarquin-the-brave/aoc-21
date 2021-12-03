@@ -4,11 +4,26 @@
 
 ; Part 1
 
-(defparameter *binaries* (uiop:read-file-lines "inputs/day2-1.txt"))
+(defvar *binaries* (uiop:read-file-lines "inputs/day3-1.txt"))
 
-; (defun get-gamma (bins)
-;   ()
-; )
+(defun get-gamma (bins)
+  (coerce (mapcar #'most-popular (transpose (mapcar (lambda (l) (coerce l 'list)) bins))) 'string)
+)
+
+(defun most-popular (chars)
+  (let ((ones 0) (zeros 0))
+    (loop for c in chars
+      do (cond
+        ((equal c #\1 ) (incf ones))
+        ((equal c #\0 ) (incf zeros))
+      )
+    )
+    (cond
+      ((> ones zeros) #\1)
+      (t #\0)
+    )
+  )
+)
 
 (defun transpose (list-of-lists) (apply #'mapcar #'list list-of-lists))
 
@@ -24,6 +39,7 @@
 
 (defun int-product (a b) (* (parse-integer a :radix 2) (parse-integer b :radix 2)))
 
-(print (int-product "1000" (flip-bits "1100")))
-(print (flip-bits "11110000"))
-(print  (mapcar #'list (list "123" "abc" "xyz")))
+(defvar *gamma* (get-gamma *binaries*))
+(defvar *epsilon* (flip-bits *gamma*))
+
+(print (int-product *gamma* *epsilon*))
