@@ -1,7 +1,7 @@
-;#!/usr/bin/env -S sbcl --script
 (load "~/quicklisp/setup.lisp")
 (ql:quickload "uiop")
 (ql:quickload "array-operations")
+(ql:quickload "str")
 
 ;;;; Plan for day 4 solution:
 ;;;; Object oriented approach.
@@ -22,7 +22,9 @@
 ;;;;    init
 ;;;;    play bingo: takes a list of integers.  Returns score of winning card, or nil of not found.
 
-
+;;;
+;;; Some Functions
+;;;
 (defun sum-array (arr)
   (let ((x 0))
     (loop for a across arr do (when a (setf x (+ x a))))
@@ -40,14 +42,26 @@
     (loop for i below imax do (
       loop for j below jmax do (
         let ((e (aref arr i j)))
-        (when e (setf x (+ x e)))
+        (when e (incf x e))
       )
     ))
     x
   )
 )
 
-; bingo card object
+(defun contains5 (arr)
+  (loop for a across arr do (when (equal 5 a) (return t)))
+)
+
+; credit to the interwebs: https://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
+(defun list-to-2d-array (list)
+  (make-array (list (length list)
+                    (length (first list)))
+              :initial-contents list))
+
+;;
+;; bingo card object
+;;
 (defclass card ()
   (
    (grid
@@ -67,21 +81,73 @@
   (sum-2array (grid self))
 )
 
-(defvar *input* (uiop:read-file-lines "inputs/day4-test.txt"))
+(defmethod play ((self card) guess)
+  (when
+    (loop named outer for i below 5 do
+      (loop for j below 5 do
+        (when (equal guess (aref (grid self) i j))
+          (progn
+            (incf (aref (row-counts self) i))
+            (incf (aref (column-counts self) j))
+            (setf (aref (grid self) i j) nil)
+            (return-from outer guess)))))
+    (when (or (contains5 (row-counts self)) (contains5 (column-counts self))) t)
+  )
+)
 
-(defparameter *arr* (make-array '(4) :initial-element 3))
-(defparameter *2arr* (make-array '(4 4) :initial-element 3))
-; (print *input*)
-; (print *arr*)
-(print (sum-array *arr*))
-(print (sum-2array *2arr*))
-(defvar *foo* (make-instance 'card :grid *2arr*))
-(print (score *foo*))
+;;
+;; Player Object
+;;
+(defclass player ()
+  ((cards
+    :initarg :cards
+    :initform (error "initial value for slot `cards` required")
+    :accessor cards)))
+
+(defmethod play ((self player) guesses)
+  (loop named outer for guess in guesses do
+    (loop for card in (cards self) do
+      (when (play card guess) (return-from outer (* guess (score card)))))))
+
+;;;
+;;; Input parsing
+;;;
+(defun read-cards-from-lines (lines)
+  (loop while lines collect
+    (let*
+      ((blank (pop lines))
+       (r0 (pop lines))
+       (r1 (pop lines))
+       (r2 (pop lines))
+       (r3 (pop lines))
+       (r4 (pop lines)))
+      (make-instance 'card
+        :grid (list-to-2d-array
+                (mapcar
+                  (lambda (rowstr) (mapcar #'parse-integer (str:words rowstr)))
+                  (list r0 r1 r2 r3 r4)))))))
+
+;;;
+;;; Solution
+;;;
 
 ; Part 1
 
+(defvar *input* (uiop:read-file-lines "inputs/day4-1.txt"))
+(defvar *guesses* (mapcar #'parse-integer (str:split "," (pop *input*))))
+(defvar *cards* (read-cards-from-lines *input*))
+(defvar *player* (make-instance 'player :cards *cards*))
+
+(print (play *player* *guesses*))
+
 ; Part 2
 
+(setf *input* (uiop:read-file-lines "inputs/day4-1.txt"))
+(setf *guesses* (mapcar #'parse-integer (str:split "," (pop *input*))))
+(setf *cards* (read-cards-from-lines *input*))
+(setf *player* (make-instance 'player :cards *cards*))
+
+(print (play *player* *guesses*))
 
 ; Notes on OO in lisp:
 ;
