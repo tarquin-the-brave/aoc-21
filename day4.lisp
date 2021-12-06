@@ -38,7 +38,7 @@
         )
     (loop for i from 0 to imax do (
       (loop for j from 0 to jmax do (
-        setf x (+ x (aref arr i j))
+        let ((elem (aref arr i j))) (when elem (setf x (+ x elem)))
       ))
     ))
     x
@@ -72,7 +72,7 @@
 ; (print *input*)
 ; (print *arr*)
 (print (sum-array *arr*))
-(print (sum-2array *2arr*))
+; (print (sum-2array *2arr*))
 ; (defvar *foo* (make-instance 'card :grid *2arr*))
 ; (print (score *foo*))
 
