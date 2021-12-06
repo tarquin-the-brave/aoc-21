@@ -63,8 +63,7 @@
 ;; bingo card object
 ;;
 (defclass card ()
-  (
-   (grid
+  ((grid
     :initarg :grid
     :initform (error "initial value for slot `grid` required")
     :accessor grid)
@@ -74,8 +73,9 @@
    (column-counts
     :initform (make-array '(5))
     :accessor column-counts)
-  )
-)
+   (in-play
+     :initform t
+     :accessor in-play)))
 
 (defmethod score ((self card))
   (sum-2array (grid self))
@@ -91,7 +91,7 @@
             (incf (aref (column-counts self) j))
             (setf (aref (grid self) i j) nil)
             (return-from outer guess)))))
-    (when (or (contains5 (row-counts self)) (contains5 (column-counts self))) t)
+    (when (or (contains5 (row-counts self)) (contains5 (column-counts self))) (progn (setf (in-play self) nil) t))
   )
 )
 
@@ -108,6 +108,19 @@
   (loop named outer for guess in guesses do
     (loop for card in (cards self) do
       (when (play card guess) (return-from outer (* guess (score card)))))))
+
+(defmethod play-to-lose ((self player) guesses)
+  (let
+    ((cards-remaining (list-length (cards self)))
+     (latest-score 0))
+    (loop named outer while (> cards-remaining 0) do
+          (let
+            ((guess (pop guesses)))
+            (loop for card in (cards self) do
+              (when (in-play card)
+                (when (play card guess)
+                  (progn (setf latest-score (* guess (score card))) (decf cards-remaining)))))))
+    latest-score))
 
 ;;;
 ;;; Input parsing
@@ -147,7 +160,7 @@
 (setf *cards* (read-cards-from-lines *input*))
 (setf *player* (make-instance 'player :cards *cards*))
 
-(print (play *player* *guesses*))
+(print (play-to-lose *player* *guesses*))
 
 ; Notes on OO in lisp:
 ;
