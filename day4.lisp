@@ -28,36 +28,28 @@
 (defun sum-array (arr)
   (let ((x 0))
     (loop for a across arr do (when a (setf x (+ x a))))
-    x
-  )
-)
+    x))
 
 (defun sum-2array (arr)
-  (let* (
-        (dims (array-dimensions arr))
-        (imax (first dims))
-        (jmax (second dims))
-        (x 0)
-        )
-    (loop for i below imax do (
-      loop for j below jmax do (
-        let ((e (aref arr i j)))
-        (when e (incf x e))
-      )
-    ))
-    x
-  )
-)
+  (let*
+    ((dims (array-dimensions arr))
+     (imax (first dims))
+     (jmax (second dims))
+     (x 0))
+    (loop for i below imax do
+      (loop for j below jmax do
+        (let ((e (aref arr i j)))
+        (when e (incf x e)))))
+    x))
 
 (defun contains5 (arr)
-  (loop for a across arr do (when (equal 5 a) (return t)))
-)
+  (loop for a across arr do (when (equal 5 a) (return t))))
 
 ; credit to the interwebs: https://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
 (defun list-to-2d-array (list)
-  (make-array (list (length list)
-                    (length (first list)))
-              :initial-contents list))
+  (make-array
+    (list (length list) (length (first list)))
+    :initial-contents list))
 
 ;;
 ;; bingo card object
@@ -78,8 +70,7 @@
      :accessor in-play)))
 
 (defmethod score ((self card))
-  (sum-2array (grid self))
-)
+  (sum-2array (grid self)))
 
 (defmethod play ((self card) guess)
   (when
@@ -91,9 +82,9 @@
             (incf (aref (column-counts self) j))
             (setf (aref (grid self) i j) nil)
             (return-from outer guess)))))
-    (when (or (contains5 (row-counts self)) (contains5 (column-counts self))) (progn (setf (in-play self) nil) t))
-  )
-)
+    (when
+      (or (contains5 (row-counts self)) (contains5 (column-counts self)))
+      (progn (setf (in-play self) nil) t))))
 
 ;;
 ;; Player Object
@@ -154,7 +145,7 @@
 (print (play *player* *guesses*))
 
 ; Part 2
-
+; reset all the variables as some got mutated
 (setf *input* (uiop:read-file-lines "inputs/day4-1.txt"))
 (setf *guesses* (mapcar #'parse-integer (str:split "," (pop *input*))))
 (setf *cards* (read-cards-from-lines *input*))
@@ -162,8 +153,3 @@
 
 (print (play-to-lose *player* *guesses*))
 
-; Notes on OO in lisp:
-;
-; I don't know how to make an initiation method like new(). where I can give arguments
-; that initial slot values are derived from.  Perhaps just a wrapper around `make-instance`
-; but that wouldn't get associated with the object in the same way...
