@@ -31,15 +31,18 @@
 )
 
 (defun sum-2array (arr)
-  (let (
-        (imax (1- (first (array-dimensions arr))))
-        (jmax (1- (second (array-dimensions arr))))
+  (let* (
+        (dims (array-dimensions arr))
+        (imax (1- (first dims)))
+        (jmax (1- (second dims)))
         (x 0)
         )
-    (loop for i from 0 to imax do (
-      (loop for j from 0 to jmax do (
-        let ((elem (aref arr i j))) (when elem (setf x (+ x elem)))
-      ))
+    (loop for i below imax do (
+      (loop for j below jmax do (print '(i j))
+            ; (let ((e (aref arr i j)))
+          ; (when e (setf x (+ x e)))
+          ; (print e))
+      )
     ))
     x
   )
@@ -72,7 +75,7 @@
 ; (print *input*)
 ; (print *arr*)
 (print (sum-array *arr*))
-; (print (sum-2array *2arr*))
+(print (sum-2array *2arr*))
 ; (defvar *foo* (make-instance 'card :grid *2arr*))
 ; (print (score *foo*))
 
