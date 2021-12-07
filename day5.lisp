@@ -2,14 +2,11 @@
 (ql:quickload "uiop")
 (ql:quickload "str")
 
-; (defparameter *points*
-;   (mapcar #'get-points (uiop:read-file-lines "inputs/day5-test.txt")))
-
 (defun vertical-line (x ymin ymax)
-  (loop for y from ymin to ymax collect (+ (* 1000 x) y)))
+  (loop for y from ymin to ymax collect (list x y)))
 
 (defun horizontal-line (y xmin xmax)
-  (loop for x from xmin to xmax collect (+ (* 1000 x) y)))
+  (loop for x from xmin to xmax collect (list x y)))
 
 (defun line-points (line)
   (let*
@@ -26,10 +23,17 @@
     ((= y0 y1) ; horizontal line
       (if (< x0 x1) (horizontal-line y0 x0 x1) (horizontal-line y0 x1 x0))))))
 
-; (defun get-points (lines)
-;   (let ((points (make-hash-table)))
-;     (loop for line in lines do
-;       (loop for point in (line-points line) do
-;          (if (aref point points) (incf (aref
+(defun get-points (lines)
+  (let ((points (make-hash-table :test 'equal)))
+    (loop for line in lines do
+      (loop for point in (line-points line) do
+        (if (gethash point points) (incf (gethash point points)) (setf (gethash point points) 1))))
+    points))
 
+(defparameter *points*
+  (get-points (uiop:read-file-lines "inputs/day5-1.txt")))
 
+(defun count-gt-2 (points)
+  (loop for v being the hash-value in points count (> v 1)))
+
+(print (count-gt-2 *points*))
