@@ -4,7 +4,7 @@
 (defparameter *crabs*
   (mapcar #'parse-integer (str:split "," (first (uiop:read-file-lines "inputs/day7-1.txt")))))
 
-(defun fuel (crabs pos)
+(defun fuel1 (crabs pos)
   (let ((f 0))
   (loop for crab in crabs do (incf f (abs (- pos crab))))
   f))
@@ -17,23 +17,37 @@
 (defun triangle (n)
   (if (= n 0) 0 (+ n (triangle (1- n)))))
 
-; Part 1
-; (loop for x below 1000 do (print (fuel *crabs* x)))
-; Part 2
-; (loop for x below 1000 do (print (fuel2 *crabs* x)))
-; TODO: Do this properly.
-; - binary search
-;   + start in middle
-;   + check values ± 1
-;   + if both sides are higher: we've found minimum
-;   + else: binary search in direction fuel value falls
 ;
-; Quick attempt below.
+; Part 1
+;
+(defun bin-search-1 (n nprev)
+  (let ((prev (fuel1 *crabs* (1- n))) (val (fuel1 *crabs* n)) (next (fuel1 *crabs* (1+ n))))
+    (cond
+      ((< prev val) (bin-search-1 (floor n 2) n))
+      ((< next val) (bin-search-1 (+ n (+ 1 (floor (- nprev n) 2))) n))
+      (t val))))
+
+(print (bin-search-1 500 1000))
+
+;
+; Part 2
+;
+(defun bin-search-2 (n nprev)
+  (let ((prev (fuel2 *crabs* (1- n))) (val (fuel2 *crabs* n)) (next (fuel2 *crabs* (1+ n))))
+    (cond
+      ((< prev val) (bin-search-2 (floor n 2) n))
+      ((< next val) (bin-search-2 (+ n (+ 1 (floor (- nprev n) 2))) n))
+      (t val))))
+
+(print (bin-search-2 500 1000))
+
+;; TODO: combine bin-search-{1,2} by taking the fuel function as a
+;; parameter.  This quick attempt below didn't work.
 ; (defun bin-search (f n nprev)
 ;   (let ((prev (f (1- n))) (val (f n)) (next (f (1+ n))))
 ;     (cond
 ;       ((< prev val) (bin-search f (floor n 2) n))
 ;       ((< next val) (bin-search f (+ n (floor (- nprev n) 2)) n))
 ;       (t val))))
-
 ; (print (bin-search (lambda (n) (fuel2 *crabs* n)) 500 1000))
+
