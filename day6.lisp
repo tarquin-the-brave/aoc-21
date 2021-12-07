@@ -37,8 +37,8 @@
   (let* ((fs (fish self)) (f0 (aref fs 0)))
     (loop for i below 8 do
       (setf (aref fs i) (aref fs (1+ i))))
-    (setf (aref fs 8) f0)
-    (setf (aref fs 6) (+ f0 (aref fs 6)))))
+    (setf (aref fs 8) f0) ; fish babies
+    (setf (aref fs 6) (+ f0 (aref fs 6))))) ; fish rejoining the dating pool
 
 (defmethod count-fish ((self school2))
   (sum-array (fish self)))
