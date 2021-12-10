@@ -79,6 +79,8 @@
 ; Match by checking union is the same length.
 ;
 
+; TODO: use fset package and clean up this function.  Don't need to
+; work out every single segment.  Can do with sets.
 (defun digits-from-signal (signals) "Returns an list of codes where the index represents the digit"
   (let*
     ((sigs (mapcar (lambda (sig) (coerce sig 'list)) (str:words signals))) ; split signals into segment characters
@@ -111,115 +113,45 @@
     ; separate the signals by their length
     (loop for sig in sigs do
       (let ((len (list-length sig)))
-        ; (print "got a new code")
-        ; (print len)
-        ; (print sig)
         (cond
           ((= len 2) (if 2seg (push sig 2seg) (setf 2seg (list sig))))
           ((= len 3) (if 3seg (push sig 3seg) (setf 3seg (list sig))))
           ((= len 4) (if 4seg (push sig 4seg) (setf 4seg (list sig))))
           ((= len 5) (if 5seg (push sig 5seg) (setf 5seg (list sig))))
           ((= len 6) (if 6seg (push sig 6seg) (setf 6seg (list sig))))
-          ((= len 7) (if 7seg (push sig 7seg) (setf 7seg (list sig))))
-        )
-        ; (print "2seg")
-        ; (print 2seg)
-
-        ; (print "3seg")
-        ; (print 3seg)
-
-        ; (print "4seg")
-        ; (print 4seg)
-
-        ; (print "5seg")
-        ; (print 5seg)
-
-        ; (print "6seg")
-        ; (print 6seg)
-
-        ; (print "7seg")
-        ; (print 7seg)
-        ))
-
-    ; (print "2seg")
-    ; (print 2seg)
-
-    ; (print "3seg")
-    ; (print 3seg)
-
-    ; (print "4seg")
-    ; (print 4seg)
-
-    ; (print "5seg")
-    ; (print 5seg)
-
-    ; (print "6seg")
-    ; (print 6seg)
-
-    ; (print "7seg")
-    ; (print 7seg)
+          ((= len 7) (if 7seg (push sig 7seg) (setf 7seg (list sig)))))))
 
     ; find the easy sets.
     (setf kn (first 2seg))
-    ; (print "kn")
-    ; (print kn)
 
     (setf ikn (first 3seg))
-    ; (print "ikn")
-    ; (print ikn)
 
     (setf jkln (first 4seg))
-    ; (print "jkln")
-    ; (print jkln)
 
     (setf ijklmno (first 7seg))
-    ; (print "ijklmno")
-    ; (print ijklmno)
 
     ; sets that require some more algebra
     (setf i (set-difference ikn kn))
-    ; (print "i")
-    ; (print i)
 
     (setf ilo (reduce (lambda (acc x) (intersection acc x)) 5seg))
-    ; (print "ilo")
-    ; (print ilo)
 
     (setf l (intersection ilo jkln))
-    ; (print "l")
-    ; (print l)
 
     (setf o (set-difference ilo (concatenate 'list i l)))
-    ; (print "o")
-    ; (print o)
 
     (setf ijno (reduce (lambda (acc x) (intersection acc x)) 6seg))
-    ; (print "ijno")
-    ; (print ijno)
 
     (setf jn (set-difference ijno ilo))
-    ; (print "jn")
-    ; (print jn)
 
     (setf n (intersection jn ikn))
-    ; (print "n")
-    ; (print n)
 
     (setf j (set-difference jn n))
-    ; (print "j")
-    ; (print j)
 
     (setf mk (set-difference ijklmno (concatenate 'list ilo jn)))
-    ; (print "mk")
-    ; (print mk)
 
     (setf k (intersection mk ikn))
-    ; (print "k")
-    ; (print k)
 
     (setf m (set-difference mk k))
-    ; (print "m")
-    ; (print m)
 
     (list
       (concatenate 'list i j k m n o)
@@ -247,36 +179,20 @@
 (defun output-value (signals output)
   (let
     ((digit-codes (digits-from-signal signals)))
-  ; (print digit-codes)
   (parse-integer
     (coerce
-      (loop for output-code in (str:words output) collect (output-digit digit-codes output-code))
+      (loop for output-code in (str:words output) collect (digit digit-codes output-code))
       'string))))
-
-(defun output-digit (digit-codes output)
-  (let ((x (digit digit-codes output)))
-    ; (print x)
-    x))
-
 
 (defun score (signals outputs)
   (let ((s 0))
     (loop for sigs in signals for output in outputs do
-      ; (print sigs)
-      ; (print output)
-      ; (print (output-value sigs output)))
       (let ((ov (output-value sigs output)))
-        ; (print ov)
-        (incf s ov)
-        ))
+        (incf s ov)))
     s))
 
 ;
 ; Part 2
 ;
 (print (score *signals* *output-values*))
-; (defvar *sigs1* (first *signals*))
-; (defvar *out1* (first *output-values*))
 
-; (print *sigs1*)
-; (print *out1*)
