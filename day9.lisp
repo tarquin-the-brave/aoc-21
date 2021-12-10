@@ -17,9 +17,20 @@
           (parse-integer (coerce (list c) 'string)))
         (coerce line 'list)))
     (uiop:read-file-lines
-      ; "inputs/day9-test.txt"
-      "inputs/day9-1.txt"
+      "inputs/day9-test.txt"
+      ; "inputs/day9-1.txt"
       ))))
+
+(defun adjacent-points (i j imax jmax)
+  (let
+    ((xs (surr i imax))
+     (ys (surr j jmax))
+     (surroundings (list)))
+    (loop for x in xs do
+        (push (list x j) surroundings))
+    (loop for y in ys do
+        (push (list i y) surroundings))
+    surroundings))
 
 (defun get-surroundings (grid i j imax jmax)
   (let
