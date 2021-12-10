@@ -2,13 +2,14 @@
 (ql:quickload '("uiop" "str"))
 
 (defun parse-line (line)
-  (mapcar #'str:words (str:split " | " line)))
+  (str:split " | " line))
 
 (defparameter *input*
   (mapcar #'parse-line (uiop:read-file-lines
-                         "inputs/day8-example.txt"
+                         ; "inputs/day8-example.txt"
                          ; "inputs/day8-test.txt"
-                         ; "inputs/day8-1.txt"
+                         ; "inputs/day8-test-1.txt"
+                         "inputs/day8-1.txt"
                          )))
 
 (defvar *signals* (mapcar #'first *input*))
@@ -22,7 +23,7 @@
 (defvar *easy-digit-count*
   (let ((n 0))
     (loop for output in *output-values* do
-      (loop for elem in output do
+      (loop for elem in (str:words output) do
         (when (member (length elem) '(2 3 4 7)) (incf n))))
     n))
 
@@ -77,9 +78,10 @@
 ; Find the digit values of the line output by matching the sets to the above.
 ; Match by checking union is the same length.
 ;
+
 (defun digits-from-signal (signals) "Returns an list of codes where the index represents the digit"
   (let*
-    ((sigs (mapcar (lambda (sig) (coerce sig 'list)) signals)) ; split signals into segment characters
+    ((sigs (mapcar (lambda (sig) (coerce sig 'list)) (str:words signals))) ; split signals into segment characters
      ; lists of lists of segments
      (2seg (list))
      (3seg (list))
@@ -226,9 +228,10 @@
       (concatenate 'list i k l n o)
       (concatenate 'list j k l n)
       (concatenate 'list i j l n o)
-      (concatenate 'list i k n)
       (concatenate 'list i j l m n o)
-      (concatenate 'list i j k l m n o))))
+      (concatenate 'list i k n)
+      (concatenate 'list i j k l m n o)
+      (concatenate 'list i j k l n o))))
 
 (defun digit (digit-codes output-code) "Finds the matching digit - returned as a character"
   (let
@@ -244,11 +247,17 @@
 (defun output-value (signals output)
   (let
     ((digit-codes (digits-from-signal signals)))
-    ; (print digit-codes)
+  ; (print digit-codes)
   (parse-integer
     (coerce
-      (loop for output-code in output collect (digit digit-codes output-code))
+      (loop for output-code in (str:words output) collect (output-digit digit-codes output-code))
       'string))))
+
+(defun output-digit (digit-codes output)
+  (let ((x (digit digit-codes output)))
+    ; (print x)
+    x))
+
 
 (defun score (signals outputs)
   (let ((s 0))
@@ -257,15 +266,14 @@
       ; (print output)
       ; (print (output-value sigs output)))
       (let ((ov (output-value sigs output)))
-        (print ov)
-        (incf s ov)))
+        ; (print ov)
+        (incf s ov)
+        ))
     s))
 
 ;
 ; Part 2
 ;
-(print (list-length *signals*))
-(print (list-length *output-values*))
 (print (score *signals* *output-values*))
 ; (defvar *sigs1* (first *signals*))
 ; (defvar *out1* (first *output-values*))
