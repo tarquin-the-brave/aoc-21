@@ -21,11 +21,9 @@
 ; 7 -> 3
 ; 8 -> 7
 (defvar *easy-digit-count*
-  (let ((n 0))
-    (loop for output in *output-values* do
-      (loop for elem in (str:words output) do
-        (when (member (length elem) '(2 3 4 7)) (incf n))))
-    n))
+  (loop for output in *output-values* sum
+    (loop for elem in (str:words output) count
+      (member (length elem) '(2 3 4 7)))))
 
 (print *easy-digit-count*)
 
@@ -185,11 +183,8 @@
       'string))))
 
 (defun score (signals outputs)
-  (let ((s 0))
-    (loop for sigs in signals for output in outputs do
-      (let ((ov (output-value sigs output)))
-        (incf s ov)))
-    s))
+    (loop for sigs in signals for output in outputs sum
+      (output-value sigs output)))
 
 ;
 ; Part 2

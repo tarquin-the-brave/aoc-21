@@ -33,23 +33,24 @@
 
 ; Part 2
 
-; Oh fffffff.... I made the wrong abstraction in part 1.  In part 1 I parsed the
-; instructions into individual vector translations then summed the translations.
-; now in part 2, the vector translations the sub undergoes are subject to the
-; current "aim" state.  Luckily the instructions to change "aim" ("up" & "down")
-; are still orthogonal to the "forward" instruction. This allows us to interpret
-; *movements* above in this "aim and move" manner instead and rely on the assumption
-; that an instruction is only ever "change aim" or "move", never both... got away
-; with that one slightly :S ...
+; Oh fffffff.... I made the wrong abstraction in part 1.  In part 1 I parsed
+; the instructions into individual vector translations then summed the
+; translations.  now in part 2, the vector translations the sub undergoes are
+; subject to the current "aim" state.  Luckily the instructions to change "aim"
+; ("up" & "down") are still orthogonal to the "forward" instruction. This
+; allows us to interpret *movements* above in this "aim and move" manner
+; instead and rely on the assumption that an instruction is only ever "change
+; aim" or "move", never both... got away with that one slightly :S ...
 (defun sum-with-aim (instructions)
   (reduce
     (lambda (current instruction)
       (let (
             (aim (first current))
             (pos (second current))
-            ; HACK: in this system "aim-change" and "move" are mutually exclusive
-            ; this allows us to construct the real x-y vector translation, knowing
-            ; that only aim or position are ever changing at once.
+            ; HACK: in this system "aim-change" and "move" are mutually
+            ; exclusive this allows us to construct the real x-y vector
+            ; translation, knowing that only aim or position are ever changing
+            ; at once.
             (aim-change (first instruction))
             (move (second instruction))
             )

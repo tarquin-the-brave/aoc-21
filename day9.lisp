@@ -65,12 +65,8 @@
 ; Part 1
 ;
 (defun total-risk (grid)
-  (let ((tot 0))
-    (loop for minimum in (find-minima grid) do
-      (incf tot
-        (1+
-          (aref grid (second minimum) (first minimum)))))
-    tot))
+    (loop for minimum in (find-minima grid) sum
+        (1+ (aref grid (second minimum) (first minimum)))))
 
 (print (total-risk *heights*))
 

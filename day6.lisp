@@ -41,17 +41,12 @@
     (setf (aref fs 6) (+ f0 (aref fs 6))))) ; fish rejoining the dating pool
 
 (defmethod count-fish ((self school2))
-  (sum-array (fish self)))
+  (reduce '+ (fish self)))
 
 (defun init-school2 (fish)
   (let ((fish-by-day (make-array '(9))))
     (loop for f in fish do (incf (aref fish-by-day f)))
     (make-instance 'school2 :fish fish-by-day)))
-
-(defun sum-array (arr)
-  (let ((x 0))
-    (loop for a across arr do (when a (setf x (+ x a))))
-    x))
 
 (defvar *school2* (init-school2 (copy-list *fish*)))
 (print (fish *school2*))

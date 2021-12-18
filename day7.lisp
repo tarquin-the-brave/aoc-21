@@ -17,9 +17,7 @@
 ; Part 1
 ;
 (defun fuel1 (crabs pos)
-  (let ((f 0))
-  (loop for crab in crabs do (incf f (abs (- pos crab))))
-  f))
+  (loop for crab in crabs sum (abs (- pos crab))))
 
 (print (bin-search (lambda (n) (fuel1 *crabs* n)) 500 1000))
 
@@ -27,9 +25,7 @@
 ; Part 2
 ;
 (defun fuel2 (crabs pos)
-  (let ((f 0))
-  (loop for crab in crabs do (incf f (triangle (abs (- pos crab)))))
-  f))
+  (loop for crab in crabs sum (triangle (abs (- pos crab)))))
 
 (print (bin-search (lambda (n) (fuel2 *crabs* n)) 500 1000))
 

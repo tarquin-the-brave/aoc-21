@@ -25,11 +25,6 @@
 ;;;
 ;;; Some Functions
 ;;;
-(defun sum-array (arr)
-  (let ((x 0))
-    (loop for a across arr do (when a (setf x (+ x a))))
-    x))
-
 (defun sum-2array (arr)
   (let*
     ((dims (array-dimensions arr))
