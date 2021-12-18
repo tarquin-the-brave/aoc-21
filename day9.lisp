@@ -17,9 +17,15 @@
           (parse-integer (coerce (list c) 'string)))
         (coerce line 'list)))
     (uiop:read-file-lines
-      "inputs/day9-test.txt"
-      ; "inputs/day9-1.txt"
+      ; "inputs/day9-test.txt"
+      "inputs/day9-1.txt"
       ))))
+
+(defun surr (i imax)
+  (cond
+    ((= 0 i) (list 1))
+    ((= imax i) (list (1- imax)))
+    (t (list (1- i) (1+ i)))))
 
 (defun adjacent-points (i j imax jmax)
   (let
@@ -33,39 +39,41 @@
     surroundings))
 
 (defun get-surroundings (grid i j imax jmax)
-  (let
-    ((xs (surr i imax))
-     (ys (surr j jmax))
-     (surroundings (list)))
-    (loop for x in xs do
-        (push (aref grid j x) surroundings))
-    (loop for y in ys do
-        (push (aref grid y i) surroundings))
-    surroundings))
+  (loop for point in (adjacent-points i j imax jmax) collect
+        (aref grid (second point) (first point))))
 
-(defun surr (i imax)
-  (cond
-    ((= 0 i) (list 1))
-    ((= imax i) (list (1- imax)))
-    (t (list (1- i) (1+ i)))))
-
-(defun risk-value (height surroundings)
-  (let
-    ((not-min (block outer
-               (loop for s in surroundings do
-                  (when (<= s height) (return-from outer t))))))
-    (when (not not-min) (1+ height))))
-
-(defun total-risk (grid)
+(defun find-minima (grid)
   (let*
-    ((risk 0)
+    ((minima (list))
      (dims (array-dimensions grid))
      (jmax (1- (first dims)))
      (imax (1- (second dims))))
     (loop for j from 0 to jmax do
       (loop for i from 0 to imax do
-         (let ((r (risk-value (aref grid j i) (get-surroundings grid i j imax jmax))))
-           (when r (progn (format t "~d, ~d => ~d~%" i j r) (incf risk r))))))
-    risk))
+         (let ((is-minimum? (less-that-all (aref grid j i) (get-surroundings grid i j imax jmax))))
+           (when is-minimum? (push (list i j) minima)))))
+    minima))
+
+(defun less-that-all (height surroundings)
+  (let
+    ((not-min (block outer
+               (loop for s in surroundings do
+                  (when (<= s height) (return-from outer t))))))
+    (not not-min)))
+
+;
+; Part 1
+;
+(defun total-risk (grid)
+  (let ((tot 0))
+    (loop for minimum in (find-minima grid) do
+      (incf tot
+        (1+
+          (aref grid (second minimum) (first minimum)))))
+    tot))
 
 (print (total-risk *heights*))
+
+;
+; Part 2
+;
