@@ -10,19 +10,6 @@
                "inputs/day12-1.txt"
                )))
 
-;
-; Part 1
-;
-; - construct graph of connections into hashmap
-;   + don't connect back to start or back from end
-; - Keep a queue of paths
-; - start a count at 0
-; - while there are paths in queue:
-;   + pop a path
-;   + lookup the head of that path in graph, for each result:
-;     * if result == end: count += 1
-;     * if result.is_lower(): paths.append(result:path)
-;
 (defun connection-into-graph (graph x y)
   "given a connection from x to y, place entry into graph,
   we leave out connections back to the start or from the end"
