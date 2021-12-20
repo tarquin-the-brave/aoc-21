@@ -52,7 +52,7 @@
     (when (equal x e) (return-from not-in nil)))
   t)
 
-(defun count-paths (graph)
+(defun count-paths (decider graph)
   (let ((ps (list (list "start"))) (c 0))
     (loop while ps do
       (let ((p (pop ps)))
@@ -60,12 +60,12 @@
           (cond
             ((equal x "end") (incf c))
             ((equal x (string-upcase x)) (setf ps (add-to-end ps x p)))
-            ((and (equal x (string-downcase x)) (not-in x p))
+            ((and (equal x (string-downcase x)) (funcall decider x p))
              (setf ps (add-to-end ps x p)))))))
     c))
 
 ;
 ; Part 1
 ;
-(print (count-paths (make-graph *connections*)))
+(print (count-paths #'not-in (make-graph *connections*)))
 
