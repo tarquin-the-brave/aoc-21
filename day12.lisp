@@ -55,6 +55,7 @@
 (defun count-paths (decider graph)
   (let ((ps (list (list "start"))) (c 0))
     (loop while ps do
+      (print (list-length ps))
       (let ((p (pop ps)))
         (loop for x in (gethash (first p) graph) do
           (cond
@@ -69,3 +70,19 @@
 ;
 (print (count-paths #'not-in (make-graph *connections*)))
 
+;
+; Part 2
+;
+(defun no-small-duplicates (xs)
+  (let ((ls (remove-if (lambda (x) (equal x (string-upcase x))) xs)))
+    (=
+      (list-length ls)
+      (list-length (remove-duplicates ls :test 'equal)))))
+
+(defun part-2-decider (e xs)
+  "either e is not in xs, or there are no lowercase duplicates in xs"
+  (or
+    (not-in e xs)
+    (no-small-duplicates xs)))
+
+(print (count-paths #'part-2-decider (make-graph *connections*)))
