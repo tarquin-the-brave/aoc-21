@@ -1,0 +1,71 @@
+(load "~/quicklisp/setup.lisp")
+(ql:quickload '("str" "fset" "uiop"))
+
+(defparameter *connections*
+  (mapcar (lambda (line) (str:split "-" line))
+             (uiop:read-file-lines
+               ; "inputs/day12-example-1.txt"
+               ; "inputs/day12-example-2.txt"
+               ; "inputs/day12-example-3.txt"
+               "inputs/day12-1.txt"
+               )))
+
+;
+; Part 1
+;
+; - construct graph of connections into hashmap
+;   + don't connect back to start or back from end
+; - Keep a queue of paths
+; - start a count at 0
+; - while there are paths in queue:
+;   + pop a path
+;   + lookup the head of that path in graph, for each result:
+;     * if result == end: count += 1
+;     * if result.is_lower(): paths.append(result:path)
+;
+(defun connection-into-graph (graph x y)
+  "given a connection from x to y, place entry into graph,
+  we leave out connections back to the start or from the end"
+  (when
+    (and (not (equal x "end")) (not (equal y "start")))
+    (if
+      (gethash x graph)
+      (push y (gethash x graph))
+      (setf (gethash x graph) (list y)))))
+
+(defun make-graph (input)
+  (let ((graph (make-hash-table :test 'equal)))
+    (loop for line in input do
+      (let ((a (first line)) (b (second line)))
+        (connection-into-graph graph a b)
+        (connection-into-graph graph b a)))
+    graph))
+
+(defun add-to-end (ps x p)
+  "ps.append(x:p)"
+  (let ((pc (copy-list p)))
+    (push x pc)
+    (append ps (list pc))))
+
+(defun not-in (e xs)
+  (loop for x in xs do
+    (when (equal x e) (return-from not-in nil)))
+  t)
+
+(defun count-paths (graph)
+  (let ((ps (list (list "start"))) (c 0))
+    (loop while ps do
+      (let ((p (pop ps)))
+        (loop for x in (gethash (first p) graph) do
+          (cond
+            ((equal x "end") (incf c))
+            ((equal x (string-upcase x)) (setf ps (add-to-end ps x p)))
+            ((and (equal x (string-downcase x)) (not-in x p))
+             (setf ps (add-to-end ps x p)))))))
+    c))
+
+;
+; Part 1
+;
+(print (count-paths (make-graph *connections*)))
+
