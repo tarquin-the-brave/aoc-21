@@ -2,8 +2,8 @@
 (ql:quickload '("str" "uiop"))
 
 (defparameter *input* (uiop:read-file-lines
-                        "inputs/day14-example.txt"
-                        ; "inputs/day14.txt"
+                        ; "inputs/day14-example.txt"
+                        "inputs/day14.txt"
                         ))
 
 (defparameter *template* (pop *input*))
@@ -107,9 +107,9 @@
     (loop for pair
       being the hash-key
       using (hash-value c) of (pairs self) do
-        (let ((new-char (gethash (coerce pair 'string) rules)))
+        (let ((new-char (first (coerce (gethash (coerce pair 'string) rules) 'list))))
             (if new-char
-              ((if (gethash (list (first pair) new-char) new-pairs)
+              (progn (if (gethash (list (first pair) new-char) new-pairs)
                  (incf (gethash (list (first pair) new-char) new-pairs) c)
                  (setf (gethash (list (first pair) new-char) new-pairs) c))
                (if (gethash (list new-char (second pair)) new-pairs)
@@ -129,4 +129,4 @@
   (let ((char-counts (counts self)))
     (- (reduce #'max char-counts) (min-non-zero char-counts))))
 
-; (print (part-2 (make-polymer *template*) *rules* 10))
+(print (part-2 (make-polymer *template*) *rules* 40))
