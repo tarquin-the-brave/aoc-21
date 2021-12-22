@@ -1,5 +1,5 @@
 (load "~/quicklisp/setup.lisp")
-(ql:quickload "uiop")
+(ql:quickload '("uiop" "fset"))
 
 (defun list-to-2d-array (l)
   (make-array
@@ -18,6 +18,7 @@
         (coerce line 'list)))
     (uiop:read-file-lines
       "inputs/day15-example.txt"
+      ; "inputs/day15-example-2.txt"
       ; "inputs/day15.txt"
       ))))
 
@@ -45,12 +46,43 @@
     surroundings))
 
 (defun display-risks (risks imax jmax)
-  (loop for j below jmax do
-      (format t "~%"
-              (loop for i below imax do
-                    (format t "~a"
+  (loop for j from 0 to jmax do
+      (format t "~%~a"
+              (loop for i from 0 to imax collect
+                    (format nil "~a"
                             (let ((risk (gethash (list i j) risks)))
                               (if risk risk ".")))))))
+
+(defun min2 (a b)
+  "like min but can deal with a == nil"
+  (if a (min a b) b))
+
+(defun sort-points-by-risk (points risks)
+  (sort points (lambda (p1 p2) (< (gethash p1 risks) (gethash p2 risks)))))
+
+(defun next-point (points risks visited)
+  (let ((points-sorted (sort-points-by-risk points risks)))
+    (loop for point in points-sorted do
+      (when (not (fset:contains? visited point)) (return-from next-point point)))
+    (first points-sorted)))
+
+(defun dijkstra-step (grid risks point visited imax jmax)
+  (let*
+    ((risk (gethash point risks))
+     (neighbours (adjacent-points point imax jmax)))
+
+     ; update neighbours risk: risk + grid value of neighbour
+    (loop for neighbour in neighbours do
+      (let*
+        ((n-risk-curr (gethash neighbour risks))
+         (ni (first  neighbour))
+         (nj (second  neighbour))
+         (n-risk-new (+ risk (aref grid nj ni))))
+
+        (setf (gethash neighbour risks) (min2 n-risk-curr n-risk-new))))
+
+     (next-point neighbours risks visited)
+    ))
 
 (defun run-dijkstra (grid)
   (let*
@@ -58,20 +90,17 @@
      (imax (1- (second dims)))
      (jmax (1- (first dims)))
      (point '(0 0))
+     (visited (fset:empty-set))
      (risks (make-hash-table :test 'equal)))
     (setf (gethash point risks) 0)
-    (loop while (< (hash-table-count risks) (array-total-size risks)) do
-      (progn
+    ; (loop while (< (hash-table-count risks) (array-total-size grid)) do
+    (loop repeat 50 do
+        (setf visited (fset:with visited point))
+        (setf point (dijkstra-step grid risks point visited imax jmax))
         (display-risks risks imax jmax)
-        (let
-          ((risk (gethash point risks))
-           (neighbours (adjacent-points point imax jmax))
-
-           ; update neighbours risk: risk + grid value of neighbour
-           ; move `point` to the neighbour with the lowest risk
-        )
-      )
+        (format t "~%~%point: ~a~%" point)
     )
+    ; )
     (gethash (list imax jmax) risks)))
 
 
